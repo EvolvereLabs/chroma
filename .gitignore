@@ -32,3 +32,6 @@ config.json
 
 # ides
 .vscode
+
+# Virtual environment
+chroma_env/
