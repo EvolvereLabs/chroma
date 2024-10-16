@@ -1,0 +1,430 @@
+Chroma(
+  (backbone_network): GraphBackbone(
+    (encoders): ModuleList(
+      (0): BackboneEncoderGNN(
+        (feature_graph): ProteinFeatureGraph(
+          (graph_builder): ProteinGraph(
+            (distances): Distances()
+            (knn): kNN()
+          )
+          (node_layers): ModuleList(
+            (0): NodeInternalCoords(
+              (internal_coords): InternalCoords()
+            )
+          )
+          (edge_layers): ModuleList(
+            (0): EdgeDistance2mer(
+              (layer_2mers): Edge2mers()
+              (layer_distance): Distances()
+              (rbf_function): RBFExpansion()
+            )
+            (1): EdgeOrientation2mer(
+              (layer_2mers): Edge2mers()
+            )
+            (2): EdgeOrientationChain()
+            (3): EdgeDistanceChain()
+          )
+          (node_linears): ModuleList(
+            (0): Linear(in_features=20, out_features=512, bias=True)
+          )
+          (edge_linears): ModuleList(
+            (0): Linear(in_features=1344, out_features=256, bias=True)
+            (1): Linear(in_features=192, out_features=256, bias=True)
+            (2): Linear(in_features=24, out_features=256, bias=True)
+            (3): Linear(in_features=3, out_features=256, bias=True)
+          )
+        )
+        (gnn): GraphNN(
+          (layers): ModuleList(
+            (0-11): 12 x GraphLayer(
+              (node_norm_layer): MaskedNorm()
+              (message_mlp): MLP(
+                (layers): Sequential(
+                  (0): Linear(in_features=1280, out_features=128, bias=True)
+                  (1): Softplus(beta=1.0, threshold=20.0)
+                  (2): Dropout(p=0.1, inplace=False)
+                  (3): Linear(in_features=128, out_features=128, bias=True)
+                  (4): Softplus(beta=1.0, threshold=20.0)
+                  (5): Dropout(p=0.1, inplace=False)
+                  (6): Linear(in_features=128, out_features=512, bias=True)
+                )
+              )
+              (update_mlp): MLP(
+                (layers): Sequential(
+                  (0): Linear(in_features=1024, out_features=512, bias=True)
+                  (1): Softplus(beta=1.0, threshold=20.0)
+                  (2): Dropout(p=0.1, inplace=False)
+                  (3): Linear(in_features=512, out_features=512, bias=True)
+                  (4): Softplus(beta=1.0, threshold=20.0)
+                  (5): Dropout(p=0.1, inplace=False)
+                  (6): Linear(in_features=512, out_features=512, bias=True)
+                )
+              )
+              (edge_norm_layer): MaskedNorm()
+              (edge_mlp): MLP(
+                (layers): Sequential(
+                  (0): Linear(in_features=1280, out_features=128, bias=True)
+                  (1): Softplus(beta=1.0, threshold=20.0)
+                  (2): Dropout(p=0.1, inplace=False)
+                  (3): Linear(in_features=128, out_features=128, bias=True)
+                  (4): Softplus(beta=1.0, threshold=20.0)
+                  (5): Dropout(p=0.1, inplace=False)
+                  (6): Linear(in_features=128, out_features=256, bias=True)
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+    (backbone_updates): ModuleList(
+      (0): GraphBackboneUpdate(
+        (frame_builder): FrameBuilder()
+        (W_s_node): Linear(in_features=512, out_features=2, bias=True)
+        (W_s_edge): Linear(in_features=256, out_features=2, bias=True)
+        (W_q): Linear(in_features=256, out_features=4, bias=True)
+        (W_t): Linear(in_features=256, out_features=3, bias=True)
+        (W_w): Linear(in_features=256, out_features=2, bias=True)
+        (W_q_global): Linear(in_features=512, out_features=4, bias=True)
+        (W_t_global): Linear(in_features=512, out_features=3, bias=True)
+        (W_w_global): Linear(in_features=512, out_features=2, bias=True)
+        (W_t_local): Linear(in_features=512, out_features=12, bias=True)
+      )
+    )
+    (time_features): FourierFeaturization()
+    (noise_perturb): DiffusionChainCov(
+      (base_gaussian): BackboneMVNGlobular()
+      (loss_rmsd): BackboneRMSD(
+        (rmsd): CrossRMSD()
+      )
+    )
+    (loss_diffusion): ReconstructionLosses(
+      (noise_perturb): DiffusionChainCov(
+        (base_gaussian): BackboneMVNGlobular()
+        (loss_rmsd): BackboneRMSD(
+          (rmsd): CrossRMSD()
+        )
+      )
+      (loss_rmsd): BackboneRMSD(
+        (rmsd): CrossRMSD()
+      )
+      (loss_fragment): LossFragmentRMSD(
+        (rmsd): CrossRMSD()
+      )
+      (loss_fragment_pair): LossFragmentPairRMSD(
+        (rmsd): CrossRMSD()
+        (graph_builder): ProteinGraph(
+          (distances): Distances()
+          (knn): kNN()
+        )
+      )
+      (loss_neighborhood): LossNeighborhoodRMSD(
+        (rmsd): CrossRMSD()
+        (graph_builder): ProteinGraph(
+          (distances): Distances()
+          (knn): kNN()
+        )
+      )
+      (loss_hbond): LossBackboneHBonds(
+        (graph_builder): ProteinGraph(
+          (distances): Distances()
+          (knn): kNN()
+        )
+        (hbonds): BackboneHBonds()
+      )
+      (loss_distance): LossBackboneResidueDistance()
+    )
+    (mlp_W): MLP(
+      (layers): Sequential(
+        (0): Linear(in_features=512, out_features=1, bias=True)
+        (1): ReLU()
+        (2): Dropout(p=0.0, inplace=False)
+        (3): Linear(in_features=1, out_features=1, bias=True)
+        (4): ReLU()
+        (5): Dropout(p=0.0, inplace=False)
+        (6): Linear(in_features=1, out_features=1, bias=True)
+      )
+    )
+  )
+  (design_network): GraphDesign(
+    (traversal): ProteinTraversalSpatial(
+      (protein_graph): ProteinGraph(
+        (distances): Distances()
+        (knn): kNN()
+      )
+    )
+    (encoder): BackboneEncoderGNN(
+      (feature_graph): ProteinFeatureGraph(
+        (graph_builder): ProteinGraph(
+          (distances): Distances()
+          (knn): kNN()
+        )
+        (node_layers): ModuleList(
+          (0): NodeInternalCoords(
+            (internal_coords): InternalCoords()
+          )
+        )
+        (edge_layers): ModuleList(
+          (0): EdgeDistance2mer(
+            (layer_2mers): Edge2mers()
+            (layer_distance): Distances()
+            (rbf_function): RBFExpansion()
+          )
+          (1): EdgeOrientation2mer(
+            (layer_2mers): Edge2mers()
+          )
+          (2): EdgeOrientationChain()
+          (3): EdgeDistanceChain()
+        )
+        (node_linears): ModuleList(
+          (0): Linear(in_features=20, out_features=128, bias=True)
+        )
+        (edge_linears): ModuleList(
+          (0): Linear(in_features=1344, out_features=128, bias=True)
+          (1): Linear(in_features=192, out_features=128, bias=True)
+          (2): Linear(in_features=24, out_features=128, bias=True)
+          (3): Linear(in_features=3, out_features=128, bias=True)
+        )
+      )
+      (gnn): GraphNN(
+        (layers): ModuleList(
+          (0-9): 10 x GraphLayer(
+            (node_norm_layer): MaskedNorm()
+            (message_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=384, out_features=128, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=128, out_features=128, bias=True)
+              )
+            )
+            (update_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=256, out_features=512, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=512, out_features=512, bias=True)
+                (4): Softplus(beta=1.0, threshold=20.0)
+                (5): Dropout(p=0.1, inplace=False)
+                (6): Linear(in_features=512, out_features=128, bias=True)
+              )
+            )
+            (edge_norm_layer): MaskedNorm()
+            (edge_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=384, out_features=128, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=128, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+      )
+    )
+    (noise_perturb): DiffusionChainCov(
+      (base_gaussian): BackboneMVNGlobular()
+      (loss_rmsd): BackboneRMSD(
+        (rmsd): CrossRMSD()
+      )
+    )
+    (time_features): NoiseTimeEmbedding(
+      (fourier_features): FourierFeaturization()
+    )
+    (decoder): SidechainDecoderGNN(
+      (W_S): Embedding(20, 128)
+      (gnn): GraphNN(
+        (layers): ModuleList(
+          (0-2): 3 x GraphLayer(
+            (node_norm_layer): MaskedNorm()
+            (message_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=384, out_features=128, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=128, out_features=128, bias=True)
+              )
+            )
+            (update_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=256, out_features=512, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=512, out_features=512, bias=True)
+                (4): Softplus(beta=1.0, threshold=20.0)
+                (5): Dropout(p=0.1, inplace=False)
+                (6): Linear(in_features=512, out_features=128, bias=True)
+              )
+            )
+            (edge_norm_layer): MaskedNorm()
+            (edge_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=384, out_features=128, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=128, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+      )
+      (decoder_S): NodePredictorS(
+        (training_loss): CrossEntropyLoss()
+        (S_mlp): MLP(
+          (layers): Sequential(
+            (0): Linear(in_features=128, out_features=512, bias=True)
+            (1): ReLU()
+            (2): Dropout(p=0.0, inplace=False)
+            (3): Linear(in_features=512, out_features=512, bias=True)
+            (4): ReLU()
+            (5): Dropout(p=0.0, inplace=False)
+            (6): Linear(in_features=512, out_features=20, bias=True)
+          )
+        )
+      )
+      (chi_to_X): SideChainBuilder()
+      (X_to_chi): ChiAngles()
+    )
+    (decoder_S_marginals): NodePredictorS(
+      (training_loss): CrossEntropyLoss()
+      (S_mlp): MLP(
+        (layers): Sequential(
+          (0): Linear(in_features=128, out_features=512, bias=True)
+          (1): ReLU()
+          (2): Dropout(p=0.0, inplace=False)
+          (3): Linear(in_features=512, out_features=512, bias=True)
+          (4): ReLU()
+          (5): Dropout(p=0.0, inplace=False)
+          (6): Linear(in_features=512, out_features=20, bias=True)
+        )
+      )
+    )
+    (decoder_S_potts): GraphPotts(
+      (W_h): Linear(in_features=128, out_features=20, bias=True)
+      (W_J_left): Linear(in_features=128, out_features=400, bias=True)
+      (W_J_right): Linear(in_features=128, out_features=400, bias=True)
+      (dropout): Dropout(p=0.1, inplace=False)
+    )
+    (embed_S): Embedding(20, 128)
+    (encoder_S_gnn): GraphNN(
+      (layers): ModuleList(
+        (0-2): 3 x GraphLayer(
+          (node_norm_layer): MaskedNorm()
+          (message_mlp): MLP(
+            (layers): Sequential(
+              (0): Linear(in_features=384, out_features=128, bias=True)
+              (1): Softplus(beta=1.0, threshold=20.0)
+              (2): Dropout(p=0.1, inplace=False)
+              (3): Linear(in_features=128, out_features=128, bias=True)
+            )
+          )
+          (update_mlp): MLP(
+            (layers): Sequential(
+              (0): Linear(in_features=256, out_features=512, bias=True)
+              (1): Softplus(beta=1.0, threshold=20.0)
+              (2): Dropout(p=0.1, inplace=False)
+              (3): Linear(in_features=512, out_features=512, bias=True)
+              (4): Softplus(beta=1.0, threshold=20.0)
+              (5): Dropout(p=0.1, inplace=False)
+              (6): Linear(in_features=512, out_features=128, bias=True)
+            )
+          )
+          (edge_norm_layer): MaskedNorm()
+          (edge_mlp): MLP(
+            (layers): Sequential(
+              (0): Linear(in_features=384, out_features=128, bias=True)
+              (1): Softplus(beta=1.0, threshold=20.0)
+              (2): Dropout(p=0.1, inplace=False)
+              (3): Linear(in_features=128, out_features=128, bias=True)
+            )
+          )
+        )
+      )
+    )
+    (decoder_chi): SidechainDecoderGNN(
+      (W_S): Embedding(20, 128)
+      (embed_chi): NodeChiRBF(
+        (embed): Linear(in_features=144, out_features=128, bias=True)
+      )
+      (embed_X): EdgeSidechainsDirect(
+        (embed): Linear(in_features=840, out_features=128, bias=True)
+      )
+      (gnn): GraphNN(
+        (layers): ModuleList(
+          (0-2): 3 x GraphLayer(
+            (node_norm_layer): MaskedNorm()
+            (message_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=384, out_features=128, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=128, out_features=128, bias=True)
+              )
+            )
+            (update_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=256, out_features=512, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=512, out_features=512, bias=True)
+                (4): Softplus(beta=1.0, threshold=20.0)
+                (5): Dropout(p=0.1, inplace=False)
+                (6): Linear(in_features=512, out_features=128, bias=True)
+              )
+            )
+            (edge_norm_layer): MaskedNorm()
+            (edge_mlp): MLP(
+              (layers): Sequential(
+                (0): Linear(in_features=384, out_features=128, bias=True)
+                (1): Softplus(beta=1.0, threshold=20.0)
+                (2): Dropout(p=0.1, inplace=False)
+                (3): Linear(in_features=128, out_features=128, bias=True)
+              )
+            )
+          )
+        )
+      )
+      (decoder_chi): NodePredictorChi(
+        (training_loss): CrossEntropyLoss()
+        (W_S): Embedding(20, 128)
+        (chi_embedding): ModuleList(
+          (0): NodeChiRBF(
+            (embed): Linear(in_features=36, out_features=128, bias=True)
+          )
+          (1): NodeChiRBF(
+            (embed): Linear(in_features=72, out_features=128, bias=True)
+          )
+          (2): NodeChiRBF(
+            (embed): Linear(in_features=108, out_features=128, bias=True)
+          )
+        )
+        (chi_mlp): ModuleList(
+          (0-3): 4 x MLP(
+            (layers): Sequential(
+              (0): Linear(in_features=128, out_features=512, bias=True)
+              (1): ReLU()
+              (2): Dropout(p=0.0, inplace=False)
+              (3): Linear(in_features=512, out_features=512, bias=True)
+              (4): ReLU()
+              (5): Dropout(p=0.0, inplace=False)
+              (6): Linear(in_features=512, out_features=36, bias=True)
+            )
+          )
+        )
+      )
+      (chi_to_X): SideChainBuilder()
+      (X_to_chi): ChiAngles()
+    )
+    (chi_to_X): SideChainBuilder()
+    (X_to_chi): ChiAngles()
+    (loss_rmsd): LossSideChainRMSD(
+      (renamer): SideChainSymmetryRenamer()
+    )
+    (loss_clash): LossSidechainClashes(
+      (graph_builder): ProteinGraph(
+        (distances): Distances()
+        (knn): kNN()
+      )
+    )
+  )
+)
