@@ -409,4 +409,4 @@ def load_model(
         strict=strict,
         strict_unexpected=strict_unexpected,
         verbose=verbose,
-    )
+    ) # This function simply loads the model with the arguments given here, and returns the created GraphBackbone object. I.e. it ends up calling the __init__ function of GraphBackbone (above) with the arguments given here.
